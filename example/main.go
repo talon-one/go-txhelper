@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v4"
-
 	"github.com/jackc/pgx/v4/pgxpool"
+
 	"github.com/talon-one/go-txhelper"
 )
 

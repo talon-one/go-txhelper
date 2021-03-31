@@ -122,15 +122,15 @@ func (tx *TxHelper) GetExecutor(ctx context.Context, operations Operation) (Exec
 		return tx.txn, nil
 	}
 	if operations.Has(InsertOperation) || operations.Has(UpdateOperation) || operations.Has(DeleteOperation) {
-		var err error
-		if err = tx.options.Hooks.BeforeStartTransaction(tx, tx.pool); err != nil {
+		if err := tx.options.Hooks.BeforeStartTransaction(tx, tx.pool); err != nil {
 			return nil, err
 		}
+		var err error
 		tx.txn, err = tx.pool.Begin(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("unable to start transaction: %w", err)
 		}
-		if err = tx.options.Hooks.AfterStartTransaction(tx, tx.pool, tx.txn); err != nil {
+		if err := tx.options.Hooks.AfterStartTransaction(tx, tx.pool, tx.txn); err != nil {
 			return nil, err
 		}
 		return tx.txn, nil
@@ -138,6 +138,7 @@ func (tx *TxHelper) GetExecutor(ctx context.Context, operations Operation) (Exec
 	return tx.pool, nil
 }
 
+//nolint:dupl //false positive with Rollback() function
 // Commit commits the transaction (if there is one).
 func (tx *TxHelper) Commit(ctx context.Context) error {
 	tx.mu.Lock()
@@ -156,6 +157,7 @@ func (tx *TxHelper) Commit(ctx context.Context) error {
 	return err
 }
 
+//nolint:dupl //false positive with Commit() function
 // Rollback rollbacks the transaction (if there is one), remember that you only need to Rollback if there was no error
 // before.
 func (tx *TxHelper) Rollback(ctx context.Context) error {
