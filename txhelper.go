@@ -51,14 +51,17 @@ type Executor interface {
 
 // Options can be used to finetune txhelper.
 type Options struct {
-	Hooks struct {
-		BeforeStartTransaction func(*TxHelper, *pgxpool.Pool) error
-		AfterStartTransaction  func(*TxHelper, *pgxpool.Pool, pgx.Tx) error
-		BeforeCommit           func(*TxHelper, *pgxpool.Pool, pgx.Tx) error
-		AfterCommit            func(*TxHelper, *pgxpool.Pool, pgx.Tx) error
-		BeforeRollback         func(*TxHelper, *pgxpool.Pool, pgx.Tx) error
-		AfterRollback          func(*TxHelper, *pgxpool.Pool, pgx.Tx) error
-	}
+	Hooks Hooks
+}
+
+// Hooks can be used to perform custom logic before or after certain events.
+type Hooks struct {
+	BeforeStartTransaction func(*TxHelper, *pgxpool.Pool, context.Context) error
+	AfterStartTransaction  func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error
+	BeforeCommit           func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error
+	AfterCommit            func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error
+	BeforeRollback         func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error
+	AfterRollback          func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error
 }
 
 // New creates a new TxHelper that can be used inside mappers. Its purpose is to assist the mappers with transaction
@@ -78,32 +81,32 @@ func (tx *TxHelper) setOptions() {
 		tx.options = &Options{}
 	}
 	if tx.options.Hooks.BeforeStartTransaction == nil {
-		tx.options.Hooks.BeforeStartTransaction = func(helper *TxHelper, pool *pgxpool.Pool) error {
+		tx.options.Hooks.BeforeStartTransaction = func(*TxHelper, *pgxpool.Pool, context.Context) error {
 			return nil
 		}
 	}
 	if tx.options.Hooks.AfterStartTransaction == nil {
-		tx.options.Hooks.AfterStartTransaction = func(helper *TxHelper, pool *pgxpool.Pool, tx pgx.Tx) error {
+		tx.options.Hooks.AfterStartTransaction = func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error {
 			return nil
 		}
 	}
 	if tx.options.Hooks.BeforeCommit == nil {
-		tx.options.Hooks.BeforeCommit = func(helper *TxHelper, pool *pgxpool.Pool, tx pgx.Tx) error {
+		tx.options.Hooks.BeforeCommit = func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error {
 			return nil
 		}
 	}
 	if tx.options.Hooks.AfterCommit == nil {
-		tx.options.Hooks.AfterCommit = func(helper *TxHelper, pool *pgxpool.Pool, tx pgx.Tx) error {
+		tx.options.Hooks.AfterCommit = func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error {
 			return nil
 		}
 	}
 	if tx.options.Hooks.BeforeRollback == nil {
-		tx.options.Hooks.BeforeRollback = func(helper *TxHelper, pool *pgxpool.Pool, tx pgx.Tx) error {
+		tx.options.Hooks.BeforeRollback = func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error {
 			return nil
 		}
 	}
 	if tx.options.Hooks.AfterRollback == nil {
-		tx.options.Hooks.AfterRollback = func(helper *TxHelper, pool *pgxpool.Pool, tx pgx.Tx) error {
+		tx.options.Hooks.AfterRollback = func(*TxHelper, *pgxpool.Pool, pgx.Tx, context.Context) error {
 			return nil
 		}
 	}
@@ -122,7 +125,7 @@ func (tx *TxHelper) GetExecutor(ctx context.Context, operations Operation) (Exec
 		return tx.txn, nil
 	}
 	if operations.Has(InsertOperation) || operations.Has(UpdateOperation) || operations.Has(DeleteOperation) {
-		if err := tx.options.Hooks.BeforeStartTransaction(tx, tx.pool); err != nil {
+		if err := tx.options.Hooks.BeforeStartTransaction(tx, tx.pool, ctx); err != nil {
 			return nil, err
 		}
 		var err error
@@ -130,7 +133,7 @@ func (tx *TxHelper) GetExecutor(ctx context.Context, operations Operation) (Exec
 		if err != nil {
 			return nil, fmt.Errorf("unable to start transaction: %w", err)
 		}
-		if err := tx.options.Hooks.AfterStartTransaction(tx, tx.pool, tx.txn); err != nil {
+		if err := tx.options.Hooks.AfterStartTransaction(tx, tx.pool, tx.txn, ctx); err != nil {
 			return nil, err
 		}
 		return tx.txn, nil
@@ -146,13 +149,13 @@ func (tx *TxHelper) Commit(ctx context.Context) error {
 	if tx.txn == nil {
 		return nil
 	}
-	if err := tx.options.Hooks.BeforeCommit(tx, tx.pool, tx.txn); err != nil {
+	if err := tx.options.Hooks.BeforeCommit(tx, tx.pool, tx.txn, ctx); err != nil {
 		return err
 	}
 	if err := tx.txn.Commit(ctx); err != nil {
 		return err
 	}
-	err := tx.options.Hooks.AfterCommit(tx, tx.pool, tx.txn)
+	err := tx.options.Hooks.AfterCommit(tx, tx.pool, tx.txn, ctx)
 	tx.txn = nil
 	return err
 }
@@ -166,7 +169,7 @@ func (tx *TxHelper) Rollback(ctx context.Context) error {
 	if tx.txn == nil {
 		return nil
 	}
-	if err := tx.options.Hooks.BeforeRollback(tx, tx.pool, tx.txn); err != nil {
+	if err := tx.options.Hooks.BeforeRollback(tx, tx.pool, tx.txn, ctx); err != nil {
 		return err
 	}
 
@@ -174,7 +177,7 @@ func (tx *TxHelper) Rollback(ctx context.Context) error {
 		return err
 	}
 
-	err := tx.options.Hooks.AfterRollback(tx, tx.pool, tx.txn)
+	err := tx.options.Hooks.AfterRollback(tx, tx.pool, tx.txn, ctx)
 	tx.txn = nil
 	return err
 }
