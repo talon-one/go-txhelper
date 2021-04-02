@@ -614,6 +614,8 @@ func (interp *Interpreter) cfg(root *node, importPath string) ([]*node, error) {
 				case src.kind == basicLit:
 					// Assign to nil.
 					src.rval = reflect.New(dest.typ.TypeOf()).Elem()
+				case n.nright == 0:
+					n.gen = reset
 				}
 
 				n.typ = dest.typ
@@ -733,7 +735,7 @@ func (interp *Interpreter) cfg(root *node, importPath string) ([]*node, error) {
 				// by constOp and available in n.rval. Nothing else to do at execution.
 				n.gen = nop
 				n.findex = notInFrame
-			case n.anc.kind == assignStmt && n.anc.action == aAssign:
+			case n.anc.kind == assignStmt && n.anc.action == aAssign && n.anc.nleft == 1:
 				// To avoid a copy in frame, if the result is to be assigned, store it directly
 				// at the frame location of destination.
 				dest := n.anc.child[childPos(n)-n.anc.nright]
