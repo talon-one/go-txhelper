@@ -30,12 +30,18 @@ func main() {
 		panic(err)
 	}
 
-	um, err := NewUserMapper(pool)
+	txh, err := txhelper.New(pool, nil)
 	if err != nil {
 		panic(err)
 	}
-	// we need to close the mapper at the end of our business logic
-	defer um.Close(ctx)
+	// we need to close the helper at the end of our business logic
+	defer func() {
+		if err := txh.Commit(ctx); err != nil {
+			panic(err)
+		}
+	}()
+
+	um := NewUserMapper(txh)
 
 	id := 1
 	wantedName := "Joe"
@@ -67,14 +73,10 @@ type UserMapper struct {
 	txh *txhelper.TxHelper
 }
 
-func NewUserMapper(pool *pgxpool.Pool) (*UserMapper, error) {
-	txh, err := txhelper.New(pool, nil)
-	if err != nil {
-		return nil, err
-	}
+func NewUserMapper(txh *txhelper.TxHelper) *UserMapper {
 	return &UserMapper{
 		txh: txh,
-	}, nil
+	}
 }
 
 func (um *UserMapper) CreateUser(ctx context.Context, id int, name string) error {
@@ -110,8 +112,4 @@ func (um *UserMapper) UpdateUserName(ctx context.Context, id int, newName string
 
 	_, err = executor.Exec(ctx, "UPDATE users SET name = $1 WHERE id = $2", newName, id)
 	return err
-}
-
-func (um *UserMapper) Close(ctx context.Context) error {
-	return um.txh.Commit(ctx)
 }
