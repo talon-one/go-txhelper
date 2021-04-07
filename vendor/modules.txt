@@ -1,4 +1,4 @@
-# github.com/Eun/yaegi-template v1.5.18
+# github.com/Eun/yaegi-template v1.5.19
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
@@ -36,7 +36,7 @@ github.com/pmezard/go-difflib/difflib
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/traefik/yaegi v0.9.15
+# github.com/traefik/yaegi v0.9.16
 ## explicit
 github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
