@@ -48,6 +48,10 @@ func (check typecheck) assignment(n *node, typ *itype, context string) error {
 		return nil
 	}
 
+	if typ.isRecursive() || typ.val != nil && typ.val.isRecursive() {
+		return nil
+	}
+
 	if !n.typ.assignableTo(typ) {
 		if context == "" {
 			return n.cfgErrorf("cannot use type %s as type %s", n.typ.id(), typ.id())
@@ -285,7 +289,10 @@ func (check typecheck) index(n *node, max int) error {
 }
 
 // arrayLitExpr type checks an array composite literal expression.
-func (check typecheck) arrayLitExpr(child []*node, typ *itype, length int) error {
+func (check typecheck) arrayLitExpr(child []*node, typ *itype) error {
+	cat := typ.cat
+	length := typ.length
+	typ = typ.val
 	visited := make(map[int]bool, len(child))
 	index := 0
 	for _, c := range child {
@@ -297,7 +304,7 @@ func (check typecheck) arrayLitExpr(child []*node, typ *itype, length int) error
 			}
 			n = c.child[1]
 			index = int(vInt(c.child[0].rval))
-		case length > 0 && index >= length:
+		case cat == arrayT && index >= length:
 			return c.cfgErrorf("index %d is out of bounds (>= %d)", index, length)
 		}
 
@@ -900,7 +907,7 @@ func arrayDeref(typ *itype) *itype {
 		return typ
 	}
 
-	if typ.cat == ptrT && typ.val.cat == arrayT && typ.val.sizedef {
+	if typ.cat == ptrT && typ.val.cat == arrayT {
 		return typ.val
 	}
 	return typ
@@ -956,7 +963,7 @@ func (check typecheck) argument(p param, ftyp *itype, i, l int, ellipsis bool) e
 		}
 		t := p.Type().TypeOf()
 		if t.Kind() != reflect.Slice || !(&itype{cat: valueT, rtype: t.Elem()}).assignableTo(atyp) {
-			return p.nod.cfgErrorf("cannot use %s as type %s", p.nod.typ.id(), (&itype{cat: arrayT, val: atyp}).id())
+			return p.nod.cfgErrorf("cannot use %s as type %s", p.nod.typ.id(), (&itype{cat: sliceT, val: atyp}).id())
 		}
 		return nil
 	}
