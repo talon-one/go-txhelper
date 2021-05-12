@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
       -
         name: lint
         continue-on-error: false
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
       -
         uses: actions/setup-go@v2
       # We cannot use nancy-github-action because it is outdated, so it's better to use the latest
@@ -63,7 +63,7 @@ jobs:
           go-version: ${{ matrix.go-version }}
       -
         name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
       -
         name: Test
         run: go test -coverprofile="coverage-${{ matrix.platform }}-${{ matrix.go-version }}.txt" -covermode=atomic ./...
