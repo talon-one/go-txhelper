@@ -71,7 +71,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
       -
         name: Send coverage
-        uses: shogo82148/actions-goveralls@v1
+        uses: shogo82148/actions-goveralls@v1.4.4
         with:
           path-to-profile: coverage-${{ matrix.platform }}-${{ matrix.go-version }}.txt
           flag-name: ${{ matrix.platform }}-${{ matrix.go-version }}
@@ -83,6 +83,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
-        uses: shogo82148/actions-goveralls@v1
+        uses: shogo82148/actions-goveralls@v1.4.4
         with:
           parallel-finished: true
