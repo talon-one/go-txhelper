@@ -1,4 +1,4 @@
-# github.com/Eun/yaegi-template v1.5.18
+# github.com/Eun/yaegi-template v1.5.20
 ## explicit
 github.com/Eun/yaegi-template
 github.com/Eun/yaegi-template/codebuffer
@@ -36,11 +36,11 @@ github.com/pmezard/go-difflib/difflib
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/traefik/yaegi v0.9.15
+# github.com/traefik/yaegi v0.9.21
 ## explicit
 github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
-# go.uber.org/atomic v1.7.0
+# go.uber.org/atomic v1.9.0
 go.uber.org/atomic
 # golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 golang.org/x/crypto/pbkdf2
