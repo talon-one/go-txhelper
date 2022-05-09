@@ -6,7 +6,7 @@ github.com/Eun/yaegi-template/codebuffer
 github.com/davecgh/go-spew/spew
 # github.com/jackc/chunkreader/v2 v2.0.1
 github.com/jackc/chunkreader/v2
-# github.com/jackc/pgconn v1.8.1
+# github.com/jackc/pgconn v1.12.1
 ## explicit
 github.com/jackc/pgconn
 github.com/jackc/pgconn/internal/ctxwatch
@@ -15,7 +15,7 @@ github.com/jackc/pgconn/stmtcache
 github.com/jackc/pgio
 # github.com/jackc/pgpassfile v1.0.0
 github.com/jackc/pgpassfile
-# github.com/jackc/pgproto3/v2 v2.0.6
+# github.com/jackc/pgproto3/v2 v2.3.0
 github.com/jackc/pgproto3/v2
 # github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b
 github.com/jackc/pgservicefile
@@ -42,9 +42,9 @@ github.com/traefik/yaegi/interp
 github.com/traefik/yaegi/stdlib
 # go.uber.org/atomic v1.7.0
 go.uber.org/atomic
-# golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
+# golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
 golang.org/x/crypto/pbkdf2
-# golang.org/x/text v0.3.3
+# golang.org/x/text v0.3.7
 golang.org/x/text/cases
 golang.org/x/text/internal
 golang.org/x/text/internal/language
